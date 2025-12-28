@@ -1,6 +1,7 @@
 use crate::models::location::{CreateLocationRequest, Location};
 use sqlx::PgPool;
 
+#[derive(Clone)]
 pub struct LocationService {
     pool: PgPool,
 }
@@ -11,13 +12,12 @@ impl LocationService {
     }
 
     pub async fn create_location(&self, req: CreateLocationRequest) -> sqlx::Result<Location> {
-        let location = sqlx::query_as!(
-            Location,
+        let location = sqlx::query_as::<_, Location>(
             r#"
             INSERT INTO locations (x, y, city, country, title, description, image_url)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id, x, y, city, country, title, description, image_url, created_at, updated_at
-            "#
+            "#,
         )
         .bind(req.x)
         .bind(req.y)
@@ -34,7 +34,7 @@ impl LocationService {
 
     pub async fn get_all_locations(&self) -> Result<Vec<Location>, sqlx::Error> {
         let locations =
-            sqlx::query_as::<_, Location>("SELECT * from locations ORDER BY created_at DESC")
+            sqlx::query_as::<_, Location>("SELECT * FROM locations ORDER BY created_at DESC")
                 .fetch_all(&self.pool)
                 .await?;
 
