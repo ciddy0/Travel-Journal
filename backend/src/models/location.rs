@@ -38,7 +38,7 @@ pub struct LocationResponse {
     pub title: String,
     pub description: Option<String>,
     pub image_url: Option<String>,
-    pub created_at: String, // ISO 8601 string
+    pub created_at: String,
 }
 
 // conversion
