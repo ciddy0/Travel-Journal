@@ -25,7 +25,9 @@ async fn main() {
         )
         .route(
             "/locations/{id}",
-            get(routes::location::get_location_by_id).put(routes::location::update_location),
+            get(routes::location::get_location_by_id)
+                .put(routes::location::update_location)
+                .delete(routes::location::delete_location),
         )
         .with_state(location_service);
 

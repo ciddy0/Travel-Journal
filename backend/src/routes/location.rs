@@ -64,3 +64,15 @@ pub async fn update_location(
 
     Ok(Json(LocationResponse::from(location)))
 }
+
+pub async fn delete_location(
+    State(service): State<LocationService>,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, StatusCode> {
+    service
+        .delete_location(id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(StatusCode::NO_CONTENT)
+}

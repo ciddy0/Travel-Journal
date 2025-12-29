@@ -91,4 +91,13 @@ impl LocationService {
 
         Ok(Some(location))
     }
+
+    pub async fn delete_location(&self, id: uuid::Uuid) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query("DELETE FROM locations WHERE id = $1")
+            .bind(id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(result.rows_affected() > 0)
+    }
 }
