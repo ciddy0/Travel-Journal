@@ -57,3 +57,14 @@ impl From<Location> for LocationResponse {
         }
     }
 }
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateLocationRequest {
+    pub x: Option<f64>,
+    pub y: Option<f64>,
+    pub city: Option<String>,
+    pub country: Option<String>,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub image_url: Option<String>,
+}

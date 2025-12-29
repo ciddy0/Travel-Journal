@@ -29,7 +29,10 @@ async fn main() {
             "/locations",
             get(routes::location::get_all_locations).post(routes::location::create_location),
         )
-        .route("/locations/{id}", get(routes::location::get_location_by_id)) // Changed :id to {id}
+        .route(
+            "/locations/{id}",
+            get(routes::location::get_location_by_id).put(routes::location::update_location),
+        )
         .with_state(location_service);
 
     // Start server

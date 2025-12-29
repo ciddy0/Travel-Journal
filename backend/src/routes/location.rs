@@ -6,7 +6,7 @@ use axum::{
 use uuid::Uuid;
 
 use crate::{
-    models::location::{CreateLocationRequest, LocationResponse},
+    models::location::{CreateLocationRequest, LocationResponse, UpdateLocationRequest},
     services::location::LocationService,
 };
 
@@ -49,4 +49,18 @@ pub async fn get_location_by_id(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     Ok(Json(LocationResponse::from(location))) // Use the From trait
+}
+
+pub async fn update_location(
+    State(service): State<LocationService>,
+    Path(id): Path<Uuid>,
+    Json(req): Json<UpdateLocationRequest>,
+) -> Result<Json<LocationResponse>, StatusCode> {
+    let location = service
+        .update_location(id, req)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+
+    Ok(Json(LocationResponse::from(location)))
 }
