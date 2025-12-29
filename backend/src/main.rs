@@ -1,6 +1,5 @@
 use axum::{Router, routing::get};
-use sqlx::postgres::PgPoolOptions;
-
+mod db;
 mod models;
 mod routes;
 mod services;
@@ -11,14 +10,9 @@ async fn main() {
     dotenvy::dotenv().ok();
 
     // Database connection
-    let database_url =
-        std::env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env file");
-
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&database_url)
+    let pool = db::establish_connection()
         .await
-        .expect("Failed to connect to database");
+        .expect("Failed to connect to the database");
 
     // Create service
     let location_service = services::location::LocationService::new(pool);
