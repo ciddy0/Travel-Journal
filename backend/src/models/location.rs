@@ -1,3 +1,4 @@
+// src/models/location.rs
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -11,6 +12,7 @@ pub struct Location {
     pub title: String,
     pub description: Option<String>,
     pub image_url: Option<String>,
+    pub visited_at: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
@@ -25,6 +27,7 @@ pub struct CreateLocationRequest {
     pub title: String,
     pub description: Option<String>,
     pub image_url: Option<String>,
+    pub visited_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 // API response DTO - what users receive
@@ -38,6 +41,7 @@ pub struct LocationResponse {
     pub title: String,
     pub description: Option<String>,
     pub image_url: Option<String>,
+    pub visited_at: Option<String>,
     pub created_at: String,
 }
 
@@ -53,6 +57,7 @@ impl From<Location> for LocationResponse {
             title: location.title,
             description: location.description,
             image_url: location.image_url,
+            visited_at: location.visited_at.map(|dt| dt.to_rfc3339()),
             created_at: location.created_at.to_rfc3339(),
         }
     }
@@ -67,4 +72,5 @@ pub struct UpdateLocationRequest {
     pub title: Option<String>,
     pub description: Option<String>,
     pub image_url: Option<String>,
+    pub visited_at: Option<chrono::DateTime<chrono::Utc>>,
 }

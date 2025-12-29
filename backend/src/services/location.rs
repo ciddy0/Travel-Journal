@@ -1,3 +1,4 @@
+// src/services/location.rs
 use crate::models::location::{CreateLocationRequest, Location, UpdateLocationRequest};
 use sqlx::PgPool;
 
@@ -14,9 +15,9 @@ impl LocationService {
     pub async fn create_location(&self, req: CreateLocationRequest) -> sqlx::Result<Location> {
         let location = sqlx::query_as::<_, Location>(
             r#"
-            INSERT INTO locations (x, y, city, country, title, description, image_url)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING id, x, y, city, country, title, description, image_url, created_at, updated_at
+            INSERT INTO locations (x, y, city, country, title, description, image_url, visited_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING id, x, y, city, country, title, description, image_url, visited_at, created_at, updated_at
             "#,
         )
         .bind(req.x)
@@ -26,6 +27,7 @@ impl LocationService {
         .bind(req.title)
         .bind(req.description)
         .bind(req.image_url)
+        .bind(req.visited_at) 
         .fetch_one(&self.pool)
         .await?;
 
@@ -33,10 +35,11 @@ impl LocationService {
     }
 
     pub async fn get_all_locations(&self) -> Result<Vec<Location>, sqlx::Error> {
-        let locations =
-            sqlx::query_as::<_, Location>("SELECT * FROM locations ORDER BY created_at DESC")
-                .fetch_all(&self.pool)
-                .await?;
+        let locations = sqlx::query_as::<_, Location>(
+            "SELECT * FROM locations ORDER BY created_at DESC"
+        )
+        .fetch_all(&self.pool)
+        .await?;
 
         Ok(locations)
     }
@@ -73,9 +76,10 @@ impl LocationService {
                 title = COALESCE($5, title),
                 description = COALESCE($6, description),
                 image_url = COALESCE($7, image_url),
+                visited_at = COALESCE($8, visited_at),
                 updated_at = NOW()
-            WHERE id = $8
-            RETURNING id, x, y, city, country, title, description, image_url, created_at, updated_at
+            WHERE id = $9
+            RETURNING id, x, y, city, country, title, description, image_url, visited_at, created_at, updated_at
             "#,
         )
         .bind(req.x)
@@ -85,6 +89,7 @@ impl LocationService {
         .bind(req.title)
         .bind(req.description)
         .bind(req.image_url)
+        .bind(req.visited_at) 
         .bind(id)
         .fetch_one(&self.pool)
         .await?;
