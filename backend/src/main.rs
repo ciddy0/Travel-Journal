@@ -1,8 +1,20 @@
-use axum::{Router, routing::get};
+use axum::{
+    Router,
+    middleware::from_fn,
+    routing::{delete, get, post, put},
+};
+mod auth;
 mod db;
+mod middleware;
 mod models;
 mod routes;
 mod services;
+
+use crate::middleware::auth::require_admin;
+use crate::routes::auth::login;
+use crate::routes::location::{
+    create_location, delete_location, get_all_locations, get_location_by_id, update_location,
+};
 
 #[tokio::main]
 async fn main() {
@@ -19,15 +31,18 @@ async fn main() {
 
     // Build router
     let app = Router::new()
-        .route(
-            "/locations",
-            get(routes::location::get_all_locations).post(routes::location::create_location),
-        )
-        .route(
-            "/locations/{id}",
-            get(routes::location::get_location_by_id)
-                .put(routes::location::update_location)
-                .delete(routes::location::delete_location),
+        // Auth route
+        .route("/login", post(login))
+        // Public GET routes
+        .route("/locations", get(get_all_locations))
+        .route("/locations/{id}", get(get_location_by_id))
+        // Merge with protected routes that require admin auth
+        .merge(
+            Router::new()
+                .route("/locations", post(create_location))
+                .route("/locations/{id}", put(update_location))
+                .route("/locations/{id}", delete(delete_location))
+                .layer(from_fn(require_admin)),
         )
         .with_state(location_service);
 

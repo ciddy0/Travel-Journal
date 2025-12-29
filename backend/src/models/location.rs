@@ -68,8 +68,3 @@ pub struct UpdateLocationRequest {
     pub description: Option<String>,
     pub image_url: Option<String>,
 }
-
-#[derive(Debug, Deserialize)]
-pub struct DeleteLocationRequest {
-    pub id: uuid::Uuid,
-}
