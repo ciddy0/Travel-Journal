@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const API_URL = "local://localhost:8080";
+const API_URL = "http://localhost:8080"; // Fixed: was 'local://localhost:8080'
 
-// create axios instance >:)
+// Create axios instance
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -10,15 +10,16 @@ const api = axios.create({
   },
 });
 
-// add token to request if it exists
+// Add token to requests if it exists
 api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// auth
+// Auth
 export const login = async (username, password) => {
   const response = await api.post("/login", { username, password });
   if (response.data.token) {
@@ -41,7 +42,7 @@ export const getLocations = async () => {
   return response.data;
 };
 
-// get a single location
+// get a specific location c:
 export const getLocation = async (id) => {
   const response = await api.get(`/locations/${id}`);
   return response.data;
@@ -61,7 +62,7 @@ export const updateLocation = async (id, locationData) => {
 
 // delete a location D:
 export const deleteLocation = async (id) => {
-  const response = await api.delete(`/locations/${id}`);
+  await api.delete(`/locations/${id}`);
 };
 
 export default api;
