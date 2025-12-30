@@ -16,6 +16,8 @@ use crate::routes::location::{
     create_location, delete_location, get_all_locations, get_location_by_id, update_location,
 };
 
+use tower_http::cors::{Any, CorsLayer};
+
 #[tokio::main]
 async fn main() {
     // Load .env file
@@ -29,6 +31,11 @@ async fn main() {
     // Create service
     let location_service = services::location::LocationService::new(pool);
 
+    // add Cors layer
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any);
     // Build router
     let app = Router::new()
         // Auth route
@@ -44,6 +51,7 @@ async fn main() {
                 .route("/locations/{id}", delete(delete_location))
                 .layer(from_fn(require_admin)),
         )
+        .layer(cors)
         .with_state(location_service);
 
     // Start server
