@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { createLocation, updateLocation } from "../services/api";
+import { createLocation, updateLocation, uploadImage } from "../services/api";
 
 function LocationForm({ location, onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
@@ -12,6 +12,10 @@ function LocationForm({ location, onSuccess, onCancel }) {
     image_url: "",
     visited_at: "",
   });
+
+  const [imageFile, setImageFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState("");
 
   useEffect(() => {
     if (location) {
@@ -27,11 +31,58 @@ function LocationForm({ location, onSuccess, onCancel }) {
           ? location.visited_at.split("T")[0]
           : "",
       });
+      if (location.image_url) {
+        setImagePreview(location.image_url);
+      }
     }
   }, [location]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!imageFile) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", imageFile);
+
+      const response = await uploadImage(formData);
+
+      setFormData((prev) => ({
+        ...prev,
+        image_url: response.image_url,
+      }));
+
+      alert("Image uploaded successfully!");
+      setImageFile(null);
+    } catch (error) {
+      console.error("Failed to upload image >:C :", error);
+      alert("Failed to upload image. Please try again :c");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (imageFile) {
+      alert("Please upload the image before submitting the form.");
+      return;
+    }
+
     try {
       // Convert to backend format
       const dataToSend = {
@@ -173,10 +224,55 @@ function LocationForm({ location, onSuccess, onCancel }) {
 
         <div style={{ marginBottom: "15px" }}>
           <label style={{ display: "block", marginBottom: "5px" }}>
+            Upload Image:
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
+          />
+          {imageFile && (
+            <button
+              type="button"
+              onClick={handleImageUpload}
+              disabled={uploading}
+              style={{
+                marginTop: "10px",
+                padding: "8px 16px",
+                backgroundColor: uploading ? "#ccc" : "#2196F3",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: uploading ? "not-allowed" : "pointer",
+                width: "100%",
+              }}
+            >
+              {uploading ? "Uploading..." : "Upload Image"}
+            </button>
+          )}
+          {imagePreview && (
+            <div style={{ marginTop: "10px" }}>
+              <img
+                src={imagePreview}
+                alt="Preview"
+                style={{
+                  width: "100%",
+                  maxHeight: "200px",
+                  objectFit: "cover",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        <div style={{ marginBottom: "15px" }}>
+          <label style={{ display: "block", marginBottom: "5px" }}>
             Image URL:
           </label>
           <input
-            type="url"
+            type="text"
             value={formData.image_url}
             onChange={(e) =>
               setFormData({ ...formData, image_url: e.target.value })
