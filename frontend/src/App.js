@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Map from "./components/Map";
 import Login from "./components/Login";
 import LocationForm from "./components/LocationForm";
-import { MapPinCheck, MapPinned, Sparkles, Trash } from "lucide-react";
+import { MapPinCheck, Sparkles, Trash } from "lucide-react";
 import {
   getLocations,
   deleteLocation,
@@ -98,9 +98,6 @@ function App() {
       {/* Header */}
       <div className="app-header">
         <div className="header-title-section">
-          <span className="header-icon">
-            <MapPinned />
-          </span>
           <h1 className="header-title">My Travel Journal</h1>
         </div>
 
@@ -112,12 +109,6 @@ function App() {
               </span>
               <span>{locations.length} places explored</span>
             </div>
-            <button onClick={handleAddLocation} className="btn btn-primary">
-              <span className="btn-icon">
-                <Sparkles />
-              </span>
-              <span>New Adventure</span>
-            </button>
             <button onClick={handleLogout} className="btn btn-secondary">
               Logout
             </button>
@@ -149,6 +140,12 @@ function App() {
             <Trash />
           </span>
           <span>Delete Memory</span>
+        </button>
+      )}
+      {/* Floating Add Button */}
+      {isLoggedIn && (
+        <button onClick={handleAddLocation} className="btn-add-floating">
+          +
         </button>
       )}
 
