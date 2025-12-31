@@ -11,7 +11,7 @@ mod models;
 mod routes;
 mod services;
 
-use crate::handlers::upload::upload_image;
+use crate::handlers::upload::{serve_image, upload_image};
 use crate::middleware::auth::require_admin;
 use crate::routes::auth::login;
 use crate::routes::location::{
@@ -45,6 +45,7 @@ async fn main() {
         // Public GET routes
         .route("/locations", get(get_all_locations))
         .route("/locations/{id}", get(get_location_by_id))
+        .route("/serveImage/{filename}", get(serve_image))
         // Merge with protected routes that require admin auth
         .merge(
             Router::new()

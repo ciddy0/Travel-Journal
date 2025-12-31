@@ -1,8 +1,13 @@
-use axum::{Json, extract::Multipart, http::StatusCode};
-
+use axum::{
+    Json,
+    extract::{Multipart, Path as AxumPath}, // Alias to avoid collision
+    http::{StatusCode, header},
+    response::Response,
+};
 use image::{GenericImageView, ImageReader};
 use std::{io::Cursor, path::Path};
-use tokio::fs;
+use tokio::fs::{self, File}; // Import File here
+use tokio::io::AsyncReadExt; // For read_to_end
 use uuid::Uuid;
 
 const MAX_FILE_SIZE: usize = 5 * 1024 * 1024; // 5MB
@@ -47,7 +52,6 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<Json<UploadRespons
         .as_deref()
         .and_then(|ct| ct.split('/').last())
         .unwrap_or("png");
-
     let filename = format!("{}.{}", Uuid::new_v4(), ext);
     let upload_dir = Path::new("uploads");
     let path = upload_dir.join(&filename);
@@ -65,4 +69,40 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<Json<UploadRespons
     Ok(Json(UploadResponse {
         image_url: format!("/uploads/{}", filename),
     }))
+}
+
+pub async fn serve_image(AxumPath(filename): AxumPath<String>) -> Result<Response, StatusCode> {
+    // sanitize filename
+    if filename.contains("..") || filename.contains("/") || filename.contains("\\") {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    let path = Path::new("uploads").join(&filename);
+
+    if !path.exists() {
+        return Err(StatusCode::NOT_FOUND);
+    }
+
+    let mut file = File::open(&path)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let mut contents = Vec::new();
+    file.read_to_end(&mut contents)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let content_type = match path.extension().and_then(|s| s.to_str()) {
+        Some("jpg") | Some("jpeg") => "image/jpeg",
+        Some("png") => "image/png",
+        Some("gif") => "image/gif",
+        Some("webp") => "image/webp",
+        _ => "application/octet-stream",
+    };
+
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, content_type)
+        .body(contents.into())
+        .unwrap())
 }
