@@ -65,9 +65,13 @@ export const deleteLocation = async (id) => {
   await api.delete(`/locations/${id}`);
 };
 
-// upload a image
-export const uploadImage = async (image) => {
-  const response = await api.put("upload", image);
+// upload a image :p
+export const uploadImage = async (imageData) => {
+  const response = await api.post("/upload", imageData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
