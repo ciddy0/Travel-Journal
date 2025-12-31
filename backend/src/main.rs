@@ -45,7 +45,7 @@ async fn main() {
         // Public GET routes
         .route("/locations", get(get_all_locations))
         .route("/locations/{id}", get(get_location_by_id))
-        .route("/serveImage/{filename}", get(serve_image))
+        .route("/uploads/{filename}", get(serve_image))
         // Merge with protected routes that require admin auth
         .merge(
             Router::new()
