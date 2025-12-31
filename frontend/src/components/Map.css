@@ -153,3 +153,7 @@
   border-bottom: 2px solid rgba(47, 93, 80, 0.1);
   rotate: 45deg;
 }
+.leaflet-top.leaflet-left {
+  top: 90px !important; /* header height + padding */
+  left: 16px !important;
+}
