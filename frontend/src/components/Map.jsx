@@ -1,12 +1,21 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "./Map.css";
+import pinIcon from "../assets/pin.png";
+import { Calendar } from "lucide-react";
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-  iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+// Custom marker icon using your own PNG
+const customIcon = new L.Icon({
+  iconUrl: pinIcon,
+  iconRetinaUrl: pinIcon,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  shadowSize: [41, 41],
+  shadowAnchor: [12, 41],
 });
 
 const Map = ({ locations, onMarkerClick, onMapClick }) => {
@@ -26,37 +35,50 @@ const Map = ({ locations, onMarkerClick, onMapClick }) => {
         <Marker
           key={location.id}
           position={[location.x, location.y]}
+          icon={customIcon}
           eventHandlers={{
             click: () => onMarkerClick(location),
           }}
         >
-          <Popup>
-            <div>
-              <h3>{location.title}</h3>
-              <p>
-                <strong>
+          <Popup className="custom-popup">
+            <div className="popup-content">
+              <div className="popup-header">
+                <h3 className="popup-title">{location.title}</h3>
+              </div>
+
+              <div className="popup-location">
+                <span className="location-text">
                   {location.city}, {location.country}
-                </strong>
-              </p>
-              {location.description && <p>{location.description}</p>}
-              {location.visited_at && (
-                <p>
-                  <em>
-                    Visited:{" "}
-                    {new Date(location.visited_at).toLocaleDateString()}
-                  </em>
-                </p>
+                </span>
+              </div>
+
+              {location.description && (
+                <p className="popup-description">{location.description}</p>
               )}
+
+              {location.visited_at && (
+                <div className="popup-date">
+                  <span className="date-icon">
+                    <Calendar />
+                  </span>
+                  <span className="date-text">
+                    {new Date(location.visited_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              )}
+
               {location.image_url && (
-                <img
-                  src={location.image_url}
-                  alt={location.title}
-                  style={{
-                    width: "100%",
-                    maxWidth: "200px",
-                    marginTop: "10px",
-                  }}
-                />
+                <div className="popup-image-container">
+                  <img
+                    src={location.image_url}
+                    alt={location.title}
+                    className="popup-image"
+                  />
+                </div>
               )}
             </div>
           </Popup>

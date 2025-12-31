@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { login } from "../services/api";
+import "./Login.css";
+import { Plane } from "lucide-react";
 
 function Login({ onLoginSuccess }) {
   const [credentials, setCredentials] = useState({
@@ -19,72 +21,50 @@ function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "40px",
-          borderRadius: "8px",
-          width: "300px",
-        }}
-      >
-        <h2>Login</h2>
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              Username:
-            </label>
+    <div className="login-overlay">
+      <div className="login-card">
+        <div className="login-header">
+          <div className="login-icon">
+            <Plane />
+          </div>
+          <h2 className="login-title">Cid's Travel Journal</h2>
+          <p className="login-subtitle">My personal travel journal :D</p>
+          <p className="login-subtitle">Click guest to view</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label className="login-label">Username</label>
             <input
               type="text"
               value={credentials.username}
               onChange={(e) =>
                 setCredentials({ ...credentials, username: e.target.value })
               }
-              style={{ width: "100%", padding: "8px" }}
+              className="login-input"
+              placeholder="Enter your username"
               required
             />
           </div>
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              Password:
-            </label>
+
+          <div className="form-group">
+            <label className="login-label">Password</label>
             <input
               type="password"
               value={credentials.password}
               onChange={(e) =>
                 setCredentials({ ...credentials, password: e.target.value })
               }
-              style={{ width: "100%", padding: "8px" }}
+              className="login-input"
+              placeholder="Enter your password"
               required
             />
           </div>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              padding: "10px",
-              backgroundColor: "#4CAF50",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Login
+
+          {error && <p className="login-error">{error}</p>}
+
+          <button type="submit" className="login-button">
+            <span>Let's Go!</span>
           </button>
         </form>
       </div>

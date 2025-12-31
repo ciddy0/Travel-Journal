@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Map from "./components/Map";
 import Login from "./components/Login";
 import LocationForm from "./components/LocationForm";
+import { MapPinCheck, MapPinned, Sparkles, Trash } from "lucide-react";
 import {
   getLocations,
   deleteLocation,
@@ -68,7 +69,7 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this location?")) {
+    if (window.confirm("Are you sure you want to delete this memory? :c")) {
       try {
         await deleteLocation(id);
         fetchLocations();
@@ -82,56 +83,42 @@ function App() {
   };
 
   if (!isLoggedIn && loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-screen">
+        <div className="loading-content">
+          <div className="loading-icon">🗺️</div>
+          <div>Loading your adventures...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="App">
       {/* Header */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "60px",
-          backgroundColor: "white",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 20px",
-          zIndex: 999,
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: "24px" }}>My Travel Journal</h1>
+      <div className="app-header">
+        <div className="header-title-section">
+          <span className="header-icon">
+            <MapPinned />
+          </span>
+          <h1 className="header-title">My Travel Journal</h1>
+        </div>
 
         {isLoggedIn && (
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={handleAddLocation}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#4CAF50",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Add Location
+          <div className="header-buttons">
+            <div className="stats-badge">
+              <span>
+                <MapPinCheck />
+              </span>
+              <span>{locations.length} places explored</span>
+            </div>
+            <button onClick={handleAddLocation} className="btn btn-primary">
+              <span className="btn-icon">
+                <Sparkles />
+              </span>
+              <span>New Adventure</span>
             </button>
-            <button
-              onClick={handleLogout}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#666",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleLogout} className="btn btn-secondary">
               Logout
             </button>
           </div>
@@ -139,7 +126,7 @@ function App() {
       </div>
 
       {/* Map */}
-      <div style={{ paddingTop: "60px" }}>
+      <div className="map-container">
         <Map locations={locations} onMarkerClick={handleMarkerClick} />
       </div>
 
@@ -156,20 +143,12 @@ function App() {
       {showForm && selectedLocation && isLoggedIn && (
         <button
           onClick={() => handleDelete(selectedLocation.id)}
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            right: "420px",
-            padding: "10px 20px",
-            backgroundColor: "#f44336",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            zIndex: 1001,
-          }}
+          className="delete-button"
         >
-          Delete Location
+          <span className="btn-icon">
+            <Trash />
+          </span>
+          <span>Delete Memory</span>
         </button>
       )}
 
