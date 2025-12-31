@@ -5,6 +5,7 @@ import L from "leaflet";
 import "./Map.css";
 import pinIcon from "../assets/pin.png";
 import { Calendar, MapPin } from "lucide-react";
+import { getImageUrl } from "../services/api";
 
 // Custom marker icon using my own PNG :D
 const customIcon = new L.Icon({
@@ -25,6 +26,9 @@ const HoverMarker = ({ location, onMarkerClick }) => {
   const map = useMap();
   const [isHovered, setIsHovered] = useState(false);
   const [position, setPosition] = useState(null);
+
+  // process the image URL
+  const imageUrl = getImageUrl(location.image_url);
 
   useEffect(() => {
     const marker = markerRef.current;
@@ -80,7 +84,7 @@ const HoverMarker = ({ location, onMarkerClick }) => {
             {/* Image */}
             {location.image_url && (
               <div className="hover-card-image">
-                <img src={location.image_url} alt={location.title} />
+                <img src={imageUrl} alt={location.title} />
                 <div className="hover-card-image-overlay" />
               </div>
             )}

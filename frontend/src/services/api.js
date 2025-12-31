@@ -75,4 +75,10 @@ export const uploadImage = async (imageData) => {
   return response.data;
 };
 
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  if (imagePath.startsWith("http")) return imagePath;
+  return `${API_URL}${imagePath}`;
+};
+
 export default api;
