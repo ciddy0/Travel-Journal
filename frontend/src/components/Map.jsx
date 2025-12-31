@@ -1,11 +1,12 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./Map.css";
 import pinIcon from "../assets/pin.png";
-import { Calendar } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
 
-// Custom marker icon using your own PNG
+// Custom marker icon using my own PNG :D
 const customIcon = new L.Icon({
   iconUrl: pinIcon,
   iconRetinaUrl: pinIcon,
@@ -17,6 +18,107 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41],
   shadowAnchor: [12, 41],
 });
+
+// Custom Marker component with hover card
+const HoverMarker = ({ location, onMarkerClick }) => {
+  const markerRef = useRef(null);
+  const map = useMap();
+  const [isHovered, setIsHovered] = useState(false);
+  const [position, setPosition] = useState(null);
+
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return;
+
+    const handleMouseOver = () => {
+      const latLng = marker.getLatLng();
+      const point = map.latLngToContainerPoint(latLng);
+
+      setPosition({
+        x: point.x,
+        y: point.y,
+      });
+
+      setIsHovered(true);
+    };
+
+    const handleMouseOut = () => setIsHovered(false);
+
+    marker.addEventListener("mouseover", handleMouseOver);
+    marker.addEventListener("mouseout", handleMouseOut);
+
+    return () => {
+      marker.removeEventListener("mouseover", handleMouseOver);
+      marker.removeEventListener("mouseout", handleMouseOut);
+    };
+  }, [map]);
+
+  return (
+    <>
+      <Marker
+        ref={markerRef}
+        position={[location.x, location.y]}
+        icon={customIcon}
+        eventHandlers={{
+          click: () => onMarkerClick(location),
+        }}
+      />
+      {/* Hover Card */}
+      {isHovered && position && (
+        <div
+          className="hover-card"
+          style={{
+            position: "absolute",
+            left: position.x,
+            top: position.y - 50,
+            transform: "translate(-50%, -100%)",
+            zIndex: 9999,
+            pointerEvents: "none",
+          }}
+        >
+          <div className="hover-card-content">
+            {/* Image */}
+            {location.image_url && (
+              <div className="hover-card-image">
+                <img src={location.image_url} alt={location.title} />
+                <div className="hover-card-image-overlay" />
+              </div>
+            )}
+
+            {/* Content */}
+            <div className="hover-card-body">
+              <h3 className="hover-card-title">{location.title}</h3>
+
+              <div className="hover-card-location">
+                <MapPin size={14} />
+                <span>
+                  {location.city}, {location.country}
+                </span>
+              </div>
+
+              {location.visited_at && (
+                <div className="hover-card-date">
+                  {new Date(location.visited_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </div>
+              )}
+
+              {location.description && (
+                <p className="hover-card-description">{location.description}</p>
+              )}
+            </div>
+
+            {/* Arrow pointer */}
+            <div className="hover-card-arrow" />
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 const Map = ({ locations, onMarkerClick, onMapClick }) => {
   return (
@@ -30,59 +132,12 @@ const Map = ({ locations, onMarkerClick, onMapClick }) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-
       {locations.map((location) => (
-        <Marker
+        <HoverMarker
           key={location.id}
-          position={[location.x, location.y]}
-          icon={customIcon}
-          eventHandlers={{
-            click: () => onMarkerClick(location),
-          }}
-        >
-          <Popup className="custom-popup">
-            <div className="popup-content">
-              <div className="popup-header">
-                <h3 className="popup-title">{location.title}</h3>
-              </div>
-
-              <div className="popup-location">
-                <span className="location-text">
-                  {location.city}, {location.country}
-                </span>
-              </div>
-
-              {location.description && (
-                <p className="popup-description">{location.description}</p>
-              )}
-
-              {location.visited_at && (
-                <div className="popup-date">
-                  <span className="date-icon">
-                    <Calendar />
-                  </span>
-                  <span className="date-text">
-                    {new Date(location.visited_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
-              )}
-
-              {location.image_url && (
-                <div className="popup-image-container">
-                  <img
-                    src={location.image_url}
-                    alt={location.title}
-                    className="popup-image"
-                  />
-                </div>
-              )}
-            </div>
-          </Popup>
-        </Marker>
+          location={location}
+          onMarkerClick={onMarkerClick}
+        />
       ))}
     </MapContainer>
   );
