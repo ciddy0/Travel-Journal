@@ -5,11 +5,13 @@ use axum::{
 };
 mod auth;
 mod db;
+mod handlers;
 mod middleware;
 mod models;
 mod routes;
 mod services;
 
+use crate::handlers::upload::upload_image;
 use crate::middleware::auth::require_admin;
 use crate::routes::auth::login;
 use crate::routes::location::{
@@ -49,6 +51,7 @@ async fn main() {
                 .route("/locations", post(create_location))
                 .route("/locations/{id}", put(update_location))
                 .route("/locations/{id}", delete(delete_location))
+                .route("/upload", post(upload_image))
                 .layer(from_fn(require_admin)),
         )
         .layer(cors)
